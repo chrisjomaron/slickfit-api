@@ -1,4 +1,4 @@
-slickfit-api
+slickfit-web
 ============
 
-Repo to house the API code for the MSM hackathon: team SlickFit 
+Repo to house the Web code for the MSM hackathon: team SlickFit
