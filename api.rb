@@ -56,6 +56,32 @@ get '/car-details/:reg' do
 	details
 end
 
+get '/tyre-sizes/:reg' do
+
+	tyresizes = nil
+
+	begin
+		client = ImportIO::new("67b7d192-7a45-4d27-9206-7aed30021346","cb6JqPScjrydwn5acMzp5LDSzj8uXcAVDg1K+mAe2Vf745cH4Mk5cs+Zxrhss4yhOm7mVJYQujH/cwzotTjiZQ==")	
+		client.proxy("10.10.2.100",3128)
+		client.connect()
+
+		callback = lambda do |query, message|
+			if message["type"] == "MESSAGE"
+				json = JSON.pretty_generate(message["data"])
+				tyresizes = json
+			end
+		end
+	end
+
+	# Query for widget blackcircle-tyresizes
+	client.query({"input"=>{"ra03tpy"=>"RA03TBY"},"connectorGuids"=>["1f774562-0fc5-43df-a50a-0d44637063f6"]}, callback )
+	client.join	
+
+	tyresizes = tyresizes.sub('Select this option ', '')
+	tyresizes
+end
+
+
 
 
 
