@@ -14,7 +14,7 @@ get '/fitting/:postcode' do
 
 	begin 
 		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
-		client.proxy("10.10.2.100",3128)
+		client.proxy("10.10.2.100",c3128)
 		client.connect()
 
 		callback = lambda do |query, message|
@@ -82,6 +82,32 @@ get '/tyre-sizes/:reg' do
 end
 
 
+
+get '/break-down-cover/:reg' do
+
+	break_down_cover = nil
+
+	begin
+		client = ImportIO::new("b4de693f-cc75-4296-af8e-eed8e79b76a2","Mh61jddfx39dBe+uNZ2KuX3w/By2VTx8knMzT8XMa0PSwERZLGWxdMFS8gYIuaeg2vA8Gb0j+1Bzr2Xmvba8EQ==")
+		# client.proxy("10.10.2.100",3128)
+		client.connect()
+
+		callback = lambda do |query, message|
+		  if message["type"] == "MESSAGE"
+		  	json = JSON.pretty_generate(message["data"])
+		    break_down_cover = json
+		    break_down_cover = break_down_cover.gsub('by_email=on','by_email=on", "left":')
+		  end
+		end
+	end
+
+	# Query for widget msm_breakdown_cover
+	client.query({"input"=>{"regno"=>"#{params[:reg]}"},"connectorGuids"=>["da1cce47-8638-4797-8837-6c375dc68043"]}, callback )
+	client.join
+
+	
+	break_down_cover
+end
 
 
 
