@@ -13,25 +13,12 @@ namespace :start do
         puts `(shotgun -p 4987 api.rb)`
       end
 
-      task :web do
-        puts `(shotgun -p 4567 web.rb)`
-      end
-
-      task :mock do
-      end
-
-  end
+end
 
 namespace :stop do
 
   task :api do
-  end
-
-  task :web do
-    kill_process_by_name('sinatra')
-  end
-
-  task :mock do
+    kill_process_by_name('api.rb')	  
   end
 
 end
