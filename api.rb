@@ -5,7 +5,6 @@ require './importio.rb'
 require 'socket'
 require 'httpclient'
 require "active_support/core_ext"
-require 'httparty'
 
 @host = Socket.gethostname
 
@@ -109,15 +108,13 @@ end
 def car_details reg
 	
 	if ENV['environment'] == 'prod'
-		result = 'in prod'
+		http = HTTPClient.new
 	else
-		result = 'out of prod'
+		http = http = HTTPClient.new("http://10.10.2.100:3128")
 	end
+	response = http_client.get "https://cdl-elvis.cdlis.co.uk/cdl-elvis/elvis?vehicle_type=PC&userid=MONEYSV2&test_flag=Y&client_type=external&search_type=vrm&function_name=xml_MONEYSV2_fnc&search_string=#{reg}"
 
-	result
-	# http = HTTPClient.new("http://10.10.2.100:3128")
-	# response = http_client.get "https://cdl-elvis.cdlis.co.uk/cdl-elvis/elvis?vehicle_type=PC&userid=MONEYSV2&test_flag=Y&client_type=external&search_type=vrm&function_name=xml_MONEYSV2_fnc&search_string=#{reg}"
-	# Hash.from_xml(response.body).to_json
+	Hash.from_xml(response.body.downcase!).to_json
 end
 
 def tyre_prices reg
