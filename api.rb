@@ -12,14 +12,28 @@ get '/' do
 	"API ready to go"	
 end
 
+get '/servicing/:reg/:postcode' do
+	content_type :json
+
+	servicing = nil
+	servicing = servicing params[:reg], params[:postcode]
+
+	JSON.pretty_generate({"results" => servicing["results"]})
+end	
+
 get '/car-details/:reg' do
 end
 
-get '/fitting/:postcode' do 
+get '/fitting-stations/:postcode' do 
 	content_type :json
 
 	fittings = nil
 	fittings = fitting params[:postcode]
+
+	fittings["results"].each do |item| 
+		matches = item["detail"].match(/center=(.*),(.*)&amp;markers/)
+		item["detail"] = {"lat" => matches[1], "long" => matches[2]}
+	end
 
 	JSON.pretty_generate({"results" => fittings["results"]})
 end
@@ -156,6 +170,27 @@ def break_down_cover reg
 	break_down_cover
 end
 
+def servicing reg, postcode
+
+	servicing = nil
+
+	begin
+		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
+		set_proxy client
+		client.connect()
+ 
+		callback = lambda do |query, message|
+  			if message["type"] == "MESSAGE"
+    			servicing = (message["data"])
+  			end
+		end
+	end
+
+	client.query({"input"=>{"registration"=>"#{reg}", "postcode"=>"#{postcode}"},"connectorGuids"=>["aa98374c-cfda-4863-ad79-3dc4245819aa"]}, callback )
+	client.join
+	servicing
+end
+
 def mot(postcode, options = {})
 	distance = options[:distance] || "8046"
 	num_of_results = options[:num_results]|| "10"
@@ -170,7 +205,5 @@ def mot(postcode, options = {})
 end
 
 def set_proxy client
-	client.proxy("10.10.2.100",3128) unless @host == "ip-10-225-147-10"
+	client.proxy("10.10.2.100",3128) unless ENV['environment'] == 'prod'
 end
-
-
