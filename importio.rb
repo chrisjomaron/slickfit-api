@@ -81,6 +81,7 @@ class ImportIO
     request.body = data
     http = Net::HTTP.new(uri.host, uri.port, @proxyHost, @proxyPort)
     http.use_ssl = uri.scheme == "https"
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     return uri, http, request
   end
   
