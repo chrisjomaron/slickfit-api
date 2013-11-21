@@ -69,37 +69,17 @@ get '/tyre-sizes/:reg' do
 	client.query({"input"=>{"ra03tpy"=>"RA03TBY"},"connectorGuids"=>["1f774562-0fc5-43df-a50a-0d44637063f6"]}, callback )
 	client.join	
 
-	tyresizes = tyresizes.sub('Select this option ', '')
 	tyresizes
 end
-
 
 
 get '/break-down-cover/:reg' do
 	content_type :json			
 
 	break_down_cover = nil
-
-	begin
-		client = ImportIO::new("b4de693f-cc75-4296-af8e-eed8e79b76a2","Mh61jddfx39dBe+uNZ2KuX3w/By2VTx8knMzT8XMa0PSwERZLGWxdMFS8gYIuaeg2vA8Gb0j+1Bzr2Xmvba8EQ==")
-		set_proxy client
-		client.connect()
-
-		callback = lambda do |query, message|
-		  if message["type"] == "MESSAGE"
-		  	json = JSON.pretty_generate(message["data"])
-		    break_down_cover = json
-		    break_down_cover = break_down_cover.gsub('by_email=on','by_email=on", "left":')
-		  end
-		end
-	end
-
-	# Query for widget msm_breakdown_cover
-	client.query({"input"=>{"regno"=>"#{params[:reg]}"},"connectorGuids"=>["da1cce47-8638-4797-8837-6c375dc68043"]}, callback )
-	client.join
-
+	break_down_cover = break_down_cover params[:reg]
 	
-	break_down_cover
+	JSON.pretty_generate({"results" => break_down_cover["results"], "total_results" => break_down_cover["totalResults"]})
 end
 
 get '/mot/:postcode' do
@@ -131,6 +111,25 @@ def tyre_prices reg
 end
 
 def break_down_cover reg
+	break_down_cover = nil
+
+	begin
+		client = ImportIO::new("b4de693f-cc75-4296-af8e-eed8e79b76a2","Mh61jddfx39dBe+uNZ2KuX3w/By2VTx8knMzT8XMa0PSwERZLGWxdMFS8gYIuaeg2vA8Gb0j+1Bzr2Xmvba8EQ==")
+		set_proxy client
+		client.connect()
+
+		callback = lambda do |query, message|
+		  if message["type"] == "MESSAGE"
+		    break_down_cover = message["data"]
+		  end
+		end
+	end
+
+	# Query for widget msm_breakdown_cover
+	client.query({"input"=>{"regno"=>"#{reg}"},"connectorGuids"=>["da1cce47-8638-4797-8837-6c375dc68043"]}, callback )
+	client.join
+	
+	break_down_cover
 end
 
 def fitting postcode
