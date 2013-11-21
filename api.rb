@@ -2,6 +2,9 @@ require 'sinatra'
 require 'shotgun'
 require 'json' 
 require './importio.rb'
+require 'socket'
+
+@host = Socket.gethostname
 
 
 get '/' do
@@ -18,7 +21,7 @@ get '/fitting/:postcode' do
 
 	begin 
 		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
-		client.proxy("10.10.2.100",c3128)
+		set_proxy client
 		client.connect()
 
 		callback = lambda do |query, message|
@@ -51,7 +54,7 @@ get '/tyre-sizes/:reg' do
 
 	begin
 		client = ImportIO::new("67b7d192-7a45-4d27-9206-7aed30021346","cb6JqPScjrydwn5acMzp5LDSzj8uXcAVDg1K+mAe2Vf745cH4Mk5cs+Zxrhss4yhOm7mVJYQujH/cwzotTjiZQ==")	
-		client.proxy("10.10.2.100",3128)
+		set_proxy client
 		client.connect()
 
 		callback = lambda do |query, message|
@@ -79,7 +82,7 @@ get '/break-down-cover/:reg' do
 
 	begin
 		client = ImportIO::new("b4de693f-cc75-4296-af8e-eed8e79b76a2","Mh61jddfx39dBe+uNZ2KuX3w/By2VTx8knMzT8XMa0PSwERZLGWxdMFS8gYIuaeg2vA8Gb0j+1Bzr2Xmvba8EQ==")
-		client.proxy("10.10.2.100",3128)
+		set_proxy client
 		client.connect()
 
 		callback = lambda do |query, message|
@@ -110,7 +113,7 @@ def tyre_prices reg
 
 	begin
 		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
-		client.proxy("10.10.2.100",3128)
+		set_proxy client
 		client.connect()
 
 		callback = lambda do |query, message|
@@ -134,6 +137,10 @@ def fitting postcode
 end
 
 def mot postcode
+end
+
+def set_proxy client
+	client.proxy("10.10.2.100",3128) unless @host == "ip-10-225-147-10"
 end
 
 
