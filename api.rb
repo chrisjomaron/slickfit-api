@@ -39,7 +39,7 @@ get '/fitting-stations/:postcode' do
 		item["detail"] = {"lat" => matches[1], "long" => matches[2]}
 	end
 
-	JSON.pretty_generate({"results" => fittings["results"]})
+	JSON.pretty_generate({"results" => fittings["results"][1..-1]})
 end
 
 get '/tyre-prices/:reg' do 
