@@ -15,6 +15,14 @@ namespace :start do
 
 end
 
+namespace :start_dev do
+
+      task :api do
+        puts `(export environment=dev && shotgun -p 4987 api.rb)`
+      end
+
+end
+
 namespace :stop do
 
   task :api do

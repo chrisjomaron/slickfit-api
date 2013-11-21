@@ -3,6 +3,8 @@ require 'shotgun'
 require 'json' 
 require './importio.rb'
 require 'socket'
+require 'httpclient'
+require "active_support/core_ext"
 
 @host = Socket.gethostname
 
@@ -12,6 +14,9 @@ get '/' do
 end
 
 get '/car-details/:reg' do
+	content_type :json
+
+	car_details params[:reg]
 end
 
 get '/fitting-stations/:postcode' do 
@@ -81,6 +86,17 @@ def fitting postcode
 end
 
 def car_details reg
+	
+	if ENV['environment'] == 'prod'
+		result = 'in prod'
+	else
+		result = 'out of prod'
+	end
+
+	result
+	# http = HTTPClient.new("http://10.10.2.100:3128")
+	# response = http_client.get "https://cdl-elvis.cdlis.co.uk/cdl-elvis/elvis?vehicle_type=PC&userid=MONEYSV2&test_flag=Y&client_type=external&search_type=vrm&function_name=xml_MONEYSV2_fnc&search_string=#{reg}"
+	# Hash.from_xml(response.body).to_json
 end
 
 def tyre_prices reg
@@ -154,4 +170,9 @@ end
 
 def set_proxy client
 	client.proxy("10.10.2.100",3128) unless ENV['environment'] == 'prod'
+end
+
+def http_client 
+	HTTPClient.new
+	HTTPClient.new("http://10.10.2.100:3128")
 end
