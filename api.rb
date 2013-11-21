@@ -14,11 +14,16 @@ end
 get '/car-details/:reg' do
 end
 
-get '/fitting/:postcode' do 
+get '/fitting-stations/:postcode' do 
 	content_type :json
 
 	fittings = nil
 	fittings = fitting params[:postcode]
+
+	fittings["results"].each do |item| 
+		matches = item["detail"].match(/center=(.*),(.*)&amp;markers/)
+		item["detail"] = {"lat" => matches[1], "long" => matches[2]}
+	end
 
 	JSON.pretty_generate({"results" => fittings["results"]})
 end
