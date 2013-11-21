@@ -3,7 +3,9 @@ require 'shotgun'
 require 'json' 
 require './importio.rb'
 require 'socket'
-require 'httparty'
+require 'httpclient'
+require "active_support/core_ext"
+
 
 @host = Socket.gethostname
 
@@ -22,6 +24,9 @@ get '/servicing/:reg/:postcode' do
 end	
 
 get '/car-details/:reg' do
+	content_type :json
+
+	car_details params[:reg]
 end
 
 get '/fitting-stations/:postcode' do 
@@ -79,6 +84,27 @@ get '/mot/:postcode/?:distance?/?:num_of_results?' do
 
 end
 
+def servicing reg, postcode
+
+	servicing = nil
+
+	begin
+    client = ImportIO::new("b4de693f-cc75-4296-af8e-eed8e79b76a2","Mh61jddfx39dBe+uNZ2KuX3w/By2VTx8knMzT8XMa0PSwERZLGWxdMFS8gYIuaeg2vA8Gb0j+1Bzr2Xmvba8EQ==")
+    	set_proxy client
+		client.connect()
+ 
+		callback = lambda do |query, message|
+  			if message["type"] == "MESSAGE"
+    			servicing = (message["data"])
+  			end
+		end
+	end
+
+    client.query({"input"=>{"registration"=>"#{reg}", "postcode"=>"#{postcode}"},"connectorGuids"=>["8837b716-ed57-4a21-b16e-f7c8b03654c6"]}, callback )
+	client.join
+	servicing
+end
+
 def fitting postcode
 	fittings = nil
 
@@ -102,6 +128,15 @@ def fitting postcode
 end
 
 def car_details reg
+	
+	if ENV['environment'] == 'prod'
+		http = HTTPClient.new
+	else
+		http = HTTPClient.new("http://10.10.2.100:3128")
+	end
+	response = http_client.get "https://cdl-elvis.cdlis.co.uk/cdl-elvis/elvis?vehicle_type=PC&userid=MONEYSV2&test_flag=Y&client_type=external&search_type=vrm&function_name=xml_MONEYSV2_fnc&search_string=#{reg}"
+
+	Hash.from_xml(response.body.downcase!).to_json
 end
 
 def tyre_prices reg
@@ -109,7 +144,7 @@ def tyre_prices reg
 
 	begin
 		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
-		# set_proxy client
+		set_proxy client
 		client.connect()
 
 		callback = lambda do |query, message|
@@ -153,7 +188,7 @@ def break_down_cover reg
 
 	begin
 		client = ImportIO::new("b4de693f-cc75-4296-af8e-eed8e79b76a2","Mh61jddfx39dBe+uNZ2KuX3w/By2VTx8knMzT8XMa0PSwERZLGWxdMFS8gYIuaeg2vA8Gb0j+1Bzr2Xmvba8EQ==")
-		#set_proxy client
+		set_proxy client
 		client.connect()
 
 		callback = lambda do |query, message|
@@ -170,28 +205,6 @@ def break_down_cover reg
 	break_down_cover
 end
 
-def servicing reg, postcode
-
-	servicing = nil
-
-	begin
-		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
-		#set_proxy client
-		client.connect()
- 
-		callback = lambda do |query, message|
-  			if message["type"] == "MESSAGE"
-    			servicing = (message["data"])
-  			end
-		end
-	end
-
-	client.query({"input"=>{"registration"=>"DA05NXE", "postcode"=>"DN40PZ"},"connectorGuids"=>["aa98374c-cfda-4863-ad79-3dc4245819aa"]}, callback )
-	#client.query({"input"=>{"registration"=>"#{reg}", "postcode"=>"#{postcode}"},"connectorGuids"=>["aa98374c-cfda-4863-ad79-3dc4245819aa"]}, callback )
-	client.join
-	servicing
-end
-
 def mot(postcode, options = {})
 	distance = options[:distance] || "8046"
 	num_of_results = options[:num_results]|| "10"
@@ -199,7 +212,13 @@ def mot(postcode, options = {})
 	api_key = "d30691fe-0a33-4114-a10c-3e9131e5713e"
 	api_url = "http://services.toadpin.com/api/mot/forClassByPostcodeWithin?postcode=#{postcode}&distance=#{distance}&apiKey=#{api_key}&motclass=4"
 
-	response = HTTParty.get(api_url)
+	if ENV['environment'] == 'prod'
+		http = HTTPClient.new
+	else
+		http = HTTPClient.new("http://10.10.2.100:3128")
+	end
+
+	response = http.get(api_url)
 
 	returned_json = JSON.parse(response.body).slice(0, num_of_results.to_i)
 
@@ -207,4 +226,9 @@ end
 
 def set_proxy client
 	client.proxy("10.10.2.100",3128) unless ENV['environment'] == 'prod'
+end
+
+def http_client 
+	HTTPClient.new
+	HTTPClient.new("http://10.10.2.100:3128")
 end
