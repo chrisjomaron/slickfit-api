@@ -17,26 +17,10 @@ end
 get '/fitting/:postcode' do 
 	content_type :json
 
-	details = nil
+	fittings = nil
+	fittings = fitting params[:postcode]
 
-	begin 
-		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
-		set_proxy client
-		client.connect()
-
-		callback = lambda do |query, message|
-			if message["type"] == "MESSAGE"
-		    	json = JSON.pretty_generate(message["data"])
-		    	details = json
-		 	end
-		end
-	end
-
-	# Query for widget blackcirclesGarage
-	client.query({"input"=>{"fittingdate"=>"21-11-2013", "postcode"=>"#{params[:postcode]}"},"connectorGuids"=>["4de1c2d0-ef03-432c-929e-772a5a99b8eb"]}, callback )
-	client.join
-
-	details
+	JSON.pretty_generate({"results" => fittings["results"]})
 end
 
 get '/tyre-prices/:reg' do 
@@ -51,25 +35,9 @@ end
 get '/tyre-sizes/:reg' do
 
 	tyresizes = nil
-
-	begin
-		client = ImportIO::new("67b7d192-7a45-4d27-9206-7aed30021346","cb6JqPScjrydwn5acMzp5LDSzj8uXcAVDg1K+mAe2Vf745cH4Mk5cs+Zxrhss4yhOm7mVJYQujH/cwzotTjiZQ==")	
-		set_proxy client
-		client.connect()
-
-		callback = lambda do |query, message|
-			if message["type"] == "MESSAGE"
-				json = JSON.pretty_generate(message["data"])
-				tyresizes = json
-			end
-		end
-	end
-
-	# Query for widget blackcircle-tyresizes
-	client.query({"input"=>{"ra03tpy"=>"RA03TBY"},"connectorGuids"=>["1f774562-0fc5-43df-a50a-0d44637063f6"]}, callback )
-	client.join	
-
-	tyresizes
+	tyresizes = tyre_sizes params[:reg]
+	
+	JSON.pretty_generate({"results" => tyresizes["results"]})
 end
 
 
@@ -83,6 +51,28 @@ get '/break-down-cover/:reg' do
 end
 
 get '/mot/:postcode' do
+end
+
+def fitting postcode
+	fittings = nil
+
+	begin 
+		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
+		set_proxy client
+		client.connect()
+
+		callback = lambda do |query, message|
+			if message["type"] == "MESSAGE"
+		    	fittings = message["data"]
+		 	end
+		end
+	end
+
+	# Query for widget blackcirclesGarage
+	client.query({"input"=>{"fittingdate"=>"21-11-2013", "postcode"=>"#{params[:postcode]}"},"connectorGuids"=>["4de1c2d0-ef03-432c-929e-772a5a99b8eb"]}, callback )
+	client.join
+
+	fittings
 end
 
 def car_details reg
@@ -110,6 +100,28 @@ def tyre_prices reg
 	details
 end
 
+def tyre_sizes reg
+	tyresizes = nil
+
+	begin
+		client = ImportIO::new("67b7d192-7a45-4d27-9206-7aed30021346","cb6JqPScjrydwn5acMzp5LDSzj8uXcAVDg1K+mAe2Vf745cH4Mk5cs+Zxrhss4yhOm7mVJYQujH/cwzotTjiZQ==")	
+		set_proxy client
+		client.connect()
+
+		callback = lambda do |query, message|
+			if message["type"] == "MESSAGE"
+				tyresizes = message["data"]
+			end
+		end
+	end
+
+	# Query for widget blackcircle-tyresizes
+	client.query({"input"=>{"ra03tpy"=>"RA03TBY"},"connectorGuids"=>["1f774562-0fc5-43df-a50a-0d44637063f6"]}, callback )
+	client.join	
+
+	tyresizes
+end
+
 def break_down_cover reg
 	break_down_cover = nil
 
@@ -130,9 +142,6 @@ def break_down_cover reg
 	client.join
 	
 	break_down_cover
-end
-
-def fitting postcode
 end
 
 def mot postcode
