@@ -125,7 +125,7 @@ def tyre_prices reg
 
 	begin
 		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
-		# set_proxy client
+		set_proxy client
 		client.connect()
 
 		callback = lambda do |query, message|
