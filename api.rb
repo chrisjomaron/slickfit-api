@@ -2,14 +2,13 @@ require 'sinatra'
 require 'shotgun'
 require 'json' 
 require './importio.rb'
-require 'socket'
 require 'httpclient'
 require "active_support/core_ext"
 require 'date'
 
-
-@host = Socket.gethostname
-
+before do
+	@http = ENV['environment'] == 'prod' ? HTTPClient.new : HTTPClient.new("http://10.10.2.100:3128")
+end
 
 get '/' do
 	"API ready to go"	
@@ -129,9 +128,7 @@ def fitting postcode
 end
 
 def car_details reg
-	http = http_client
-
-	response = http_client.get "https://cdl-elvis.cdlis.co.uk/cdl-elvis/elvis?vehicle_type=PC&userid=MONEYSV2&test_flag=Y&client_type=external&search_type=vrm&function_name=xml_MONEYSV2_fnc&search_string=#{reg}"
+	response = @http.get "https://cdl-elvis.cdlis.co.uk/cdl-elvis/elvis?vehicle_type=PC&userid=MONEYSV2&test_flag=Y&client_type=external&search_type=vrm&function_name=xml_MONEYSV2_fnc&search_string=#{reg}"
 
 	Hash.from_xml(response.body.downcase!).to_json
 end
@@ -204,12 +201,11 @@ end
 
 def mot(postcode, options = {})
 	distance = options[:distance] || "8046"
-	num_of_results = options[:num_results]|| "10"
+	num_of_results = options[:num_results]|| "5"
 
 	api_key = "d30691fe-0a33-4114-a10c-3e9131e5713e"
 	api_url = "http://services.toadpin.com/api/mot/forClassByPostcodeWithin?postcode=#{postcode}&distance=#{distance}&apiKey=#{api_key}&motclass=4"
-	http = http_client
-	response = http.get(api_url)
+	response = @http.get(api_url)
 
 	returned_json = JSON.parse(response.body.downcase).slice(0, num_of_results.to_i)
 
@@ -221,10 +217,6 @@ def set_proxy client
 	client.proxy("10.10.2.100",3128) unless ENV['environment'] == 'prod'
 end
 
-def http_client 
-	ENV['environment'] == 'prod' ? HTTPClient.new : HTTPClient.new("http://10.10.2.100:3128")
-end
-
 def date_of_next day
 	date = Date.parse(day)
 
@@ -233,6 +225,3 @@ def date_of_next day
 	date + delta
 end
 
-error 404 do
-	'Resource not found'
-end
