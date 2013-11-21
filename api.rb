@@ -8,7 +8,11 @@ get '/' do
 	"API ready to go"	
 end
 
+get '/car-details/:reg' do
+end
+
 get '/fitting/:postcode' do 
+	content_type :json
 
 	details = nil
 
@@ -32,28 +36,13 @@ get '/fitting/:postcode' do
 	details
 end
 
-get '/car-details/:reg' do 
+get '/tyre-prices/:reg' do 
+	content_type :json
 	
 	details = nil
-
-	begin
-		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
-		client.proxy("10.10.2.100",3128)
-		client.connect()
-
-		callback = lambda do |query, message|
-			if message["type"] == "MESSAGE"
-				json = JSON.pretty_generate(message["data"])
-				details = json
-			end
-		end
-	end
-
-	# Query for widget BlackCirclesMail
-	client.query({"input"=>{"reg"=>"#{params[:reg]}"},"connectorGuids"=>["351c9a06-3651-4103-9c3f-820c146e7527"]}, callback )
-	client.join
-
-	details
+	details = tyre_prices params[:reg]
+	
+	JSON.pretty_generate({"results" => details["results"]})
 end
 
 get '/tyre-sizes/:reg' do
@@ -84,12 +73,13 @@ end
 
 
 get '/break-down-cover/:reg' do
+	content_type :json			
 
 	break_down_cover = nil
 
 	begin
 		client = ImportIO::new("b4de693f-cc75-4296-af8e-eed8e79b76a2","Mh61jddfx39dBe+uNZ2KuX3w/By2VTx8knMzT8XMa0PSwERZLGWxdMFS8gYIuaeg2vA8Gb0j+1Bzr2Xmvba8EQ==")
-		# client.proxy("10.10.2.100",3128)
+		client.proxy("10.10.2.100",3128)
 		client.connect()
 
 		callback = lambda do |query, message|
@@ -109,13 +99,41 @@ get '/break-down-cover/:reg' do
 	break_down_cover
 end
 
+get '/mot/:postcode' do
+end
 
+def car_details reg
+end
 
+def tyre_prices reg
+	details = nil
 
+	begin
+		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
+		client.proxy("10.10.2.100",3128)
+		client.connect()
 
+		callback = lambda do |query, message|
+			if message["type"] == "MESSAGE"
+				details = message["data"]
+			end
+		end
+	end
 
+	# Query for widget BlackCirclesMail
+	client.query({"input"=>{"reg"=>"#{reg}"},"connectorGuids"=>["351c9a06-3651-4103-9c3f-820c146e7527"]}, callback)
+	client.join
 
+	details
+end
 
+def break_down_cover reg
+end
 
+def fitting postcode
+end
+
+def mot postcode
+end
 
 
