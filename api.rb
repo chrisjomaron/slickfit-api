@@ -163,7 +163,7 @@ def servicing reg, postcode
 	servicing = nil
 
 	begin
-		client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
+    client = ImportIO::new("01ab8bb6-e2a5-4d17-8fd2-ec9f289ca088","+2WYxx5fnhCB75vFF2R5o1HeAjms4lpz0lOZvjQxePh9R3SAMYX897j67NrPaT7hUia7eNwV0YEVjzRxVVRYrA==")
 		set_proxy client
 		client.connect()
  
@@ -174,7 +174,7 @@ def servicing reg, postcode
 		end
 	end
 
-	client.query({"input"=>{"registration"=>"#{reg}", "postcode"=>"#{postcode}"},"connectorGuids"=>["aa98374c-cfda-4863-ad79-3dc4245819aa"]}, callback )
+  client.query({"input"=>{"registration"=>"#{reg}", "postcode"=>"#{postcode}"},"connectorGuids"=>["aa98374c-cfda-4863-ad79-3dc4245819aa"]}, callback )
 	client.join
 	servicing
 end
