@@ -3,12 +3,9 @@ require 'shotgun'
 require 'json' 
 require './importio.rb'
 require 'socket'
-<<<<<<< HEAD
 require 'httpclient'
 require "active_support/core_ext"
-=======
 require 'httparty'
->>>>>>> 6bb281750169ef54735f0925b75868d67d3d95e8
 
 @host = Socket.gethostname
 
@@ -172,7 +169,7 @@ def break_down_cover reg
 
 	begin
 		client = ImportIO::new("b4de693f-cc75-4296-af8e-eed8e79b76a2","Mh61jddfx39dBe+uNZ2KuX3w/By2VTx8knMzT8XMa0PSwERZLGWxdMFS8gYIuaeg2vA8Gb0j+1Bzr2Xmvba8EQ==")
-		#set_proxy client
+		set_proxy client
 		client.connect()
 
 		callback = lambda do |query, message|
