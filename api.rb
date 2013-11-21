@@ -111,7 +111,7 @@ def car_details reg
 	if ENV['environment'] == 'prod'
 		http = HTTPClient.new
 	else
-		http = http = HTTPClient.new("http://10.10.2.100:3128")
+		http = HTTPClient.new("http://10.10.2.100:3128")
 	end
 	response = http_client.get "https://cdl-elvis.cdlis.co.uk/cdl-elvis/elvis?vehicle_type=PC&userid=MONEYSV2&test_flag=Y&client_type=external&search_type=vrm&function_name=xml_MONEYSV2_fnc&search_string=#{reg}"
 
@@ -212,7 +212,13 @@ def mot(postcode, options = {})
 	api_key = "d30691fe-0a33-4114-a10c-3e9131e5713e"
 	api_url = "http://services.toadpin.com/api/mot/forClassByPostcodeWithin?postcode=#{postcode}&distance=#{distance}&apiKey=#{api_key}&motclass=4"
 
-	response = HTTParty.get(api_url)
+	if ENV['environment'] == 'prod'
+		http = HTTPClient.new
+	else
+		http = HTTPClient.new("http://10.10.2.100:3128")
+	end
+
+	response = http.get(api_url)
 
 	returned_json = JSON.parse(response.body).slice(0, num_of_results.to_i)
 
