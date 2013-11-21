@@ -153,7 +153,5 @@ def mot postcode
 end
 
 def set_proxy client
-	client.proxy("10.10.2.100",3128) unless @host == "ip-10-225-147-10"
+	client.proxy("10.10.2.100",3128) unless ENV['environment'] == 'prod'
 end
-
-

@@ -10,7 +10,7 @@ HOME_DIR = "#{File.dirname(__FILE__)}"
 namespace :start do
 
       task :api do
-        puts `(shotgun -p 4987 api.rb)`
+        puts `(export environment=prod && shotgun -p 4987 api.rb)`
       end
 
 end
