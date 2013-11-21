@@ -3,6 +3,7 @@ require 'shotgun'
 require 'json' 
 require './importio.rb'
 require 'socket'
+require 'httparty'
 
 @host = Socket.gethostname
 
@@ -50,7 +51,18 @@ get '/break-down-cover/:reg' do
 	JSON.pretty_generate({"results" => break_down_cover["results"], "total_results" => break_down_cover["totalResults"]})
 end
 
-get '/mot/:postcode' do
+get '/mot/:postcode/?:distance?/?:num_of_results?' do
+	content_type :json
+
+	options = {}
+
+	options[:distance] = params[:distance] unless params[:distance].nil?
+	options[:num_results] = params[:num_of_results] unless params[:num_of_results].nil?
+
+	mot_centers = mot params[:postcode], options
+
+	JSON.pretty_generate("results" => mot_centers)
+
 end
 
 def fitting postcode
@@ -127,7 +139,7 @@ def break_down_cover reg
 
 	begin
 		client = ImportIO::new("b4de693f-cc75-4296-af8e-eed8e79b76a2","Mh61jddfx39dBe+uNZ2KuX3w/By2VTx8knMzT8XMa0PSwERZLGWxdMFS8gYIuaeg2vA8Gb0j+1Bzr2Xmvba8EQ==")
-		set_proxy client
+		#set_proxy client
 		client.connect()
 
 		callback = lambda do |query, message|
@@ -144,7 +156,17 @@ def break_down_cover reg
 	break_down_cover
 end
 
-def mot postcode
+def mot(postcode, options = {})
+	distance = options[:distance] || "8046"
+	num_of_results = options[:num_results]|| "10"
+
+	api_key = "d30691fe-0a33-4114-a10c-3e9131e5713e"
+	api_url = "http://services.toadpin.com/api/mot/forClassByPostcodeWithin?postcode=#{postcode}&distance=#{distance}&apiKey=#{api_key}&motclass=4"
+
+	response = HTTParty.get(api_url)
+
+	returned_json = JSON.parse(response.body).slice(0, num_of_results.to_i)
+
 end
 
 def set_proxy client
