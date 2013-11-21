@@ -2,24 +2,23 @@ require 'fileutils'
 
 HOME_DIR = "#{File.dirname(__FILE__)}"
 
-
   task :ensure_gems do
     puts `(bundle install --system)`
   end
 
 namespace :start do
 
-      task :api do
-        puts `(export environment=prod && shotgun -p 4987 api.rb)`
-      end
+    task :api do
+      puts `(export environment=prod && shotgun -p 4987 api.rb)`
+    end
 
 end
 
 namespace :start_dev do
 
-      task :api do
-        puts `(export environment=dev && shotgun -p 4987 api.rb)`
-      end
+    task :api do
+      puts `(export environment=dev && shotgun -p 4987 api.rb)`
+    end
 
 end
 
