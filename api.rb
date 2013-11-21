@@ -5,6 +5,7 @@ require './importio.rb'
 require 'socket'
 require 'httpclient'
 require "active_support/core_ext"
+require 'date'
 
 
 @host = Socket.gethostname
@@ -121,7 +122,7 @@ def fitting postcode
 	end
 
 	# Query for widget blackcirclesGarage
-	client.query({"input"=>{"fittingdate"=>"21-11-2013", "postcode"=>"#{params[:postcode]}"},"connectorGuids"=>["4de1c2d0-ef03-432c-929e-772a5a99b8eb"]}, callback )
+	client.query({"input"=>{"fittingdate"=> date_of_next("Wednesday").strftime("%d-%m-%Y"), "postcode"=>"#{params[:postcode]}"},"connectorGuids"=>["4de1c2d0-ef03-432c-929e-772a5a99b8eb"]}, callback )
 	client.join
 
 	fittings
@@ -173,7 +174,7 @@ def tyre_sizes reg
 	end
 
 	# Query for widget blackcircle-tyresizes
-	client.query({"input"=>{"ra03tpy"=>"RA03TBY"},"connectorGuids"=>["1f774562-0fc5-43df-a50a-0d44637063f6"]}, callback )
+	client.query({"input"=>{"ra03tpy"=>"#{reg}"},"connectorGuids"=>["1f774562-0fc5-43df-a50a-0d44637063f6"]}, callback )
 	client.join	
 
 	tyresizes
@@ -210,7 +211,9 @@ def mot(postcode, options = {})
 	http = http_client
 	response = http.get(api_url)
 
-	returned_json = JSON.parse(response.body).slice(0, num_of_results.to_i)
+	returned_json = JSON.parse(response.body.downcase).slice(0, num_of_results.to_i)
+
+	#404
 
 end
 
@@ -220,4 +223,16 @@ end
 
 def http_client 
 	ENV['environment'] == 'prod' ? HTTPClient.new : HTTPClient.new("http://10.10.2.100:3128")
+end
+
+def date_of_next day
+	date = Date.parse(day)
+
+	delta = date > Date.today ? 0 : 7
+
+	date + delta
+end
+
+error 404 do
+	'Resource not found'
 end
